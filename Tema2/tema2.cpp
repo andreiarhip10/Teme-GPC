@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -102,11 +101,11 @@ void Display3() {
 	double xmax, xmin;
 	double x, y, x1;
 	double ratia = 0.05;
-	double ymax,ymin;
-	
+	double ymax, ymin;
+
 	// calculul valorilor maxime/minime ptr. x si y
 	// aceste valori vor fi folosite ulterior la scalare
-	xmax = 100;
+	xmax = 25;	//	daca xmax = 100, liniile vor fi desenate prea apropiate
 	xmin = 0;
 	ymax = 1, ymin = 0;
 	for (x1 = xmin; x1 < xmax; x1 += ratia) {
@@ -120,11 +119,11 @@ void Display3() {
 	// afisarea punctelor propriu-zise precedata de scalare
 	glColor3f(1, 0.1, 0.1); // rosu
 	glBegin(GL_LINE_STRIP);
-	for (x1 = xmin; x1 < xmax; x1 += ratia) {		
+	for (x1 = xmin; x1 < xmax; x1 += ratia) {
 		x = x1 / xmax;
-		y = fabs(x1-round(x1)) / x1 /ymax;
+		y = fabs(x1 - round(x1)) / x1 / ymax;
 		if (x1 == 0) y = 1;
-		glVertex2f(x,y);
+		glVertex2f(x, y);
 	}
 	glEnd();
 }
@@ -139,14 +138,14 @@ void Display4() {
 	double ratia = 0.00001;
 	double t;
 	double x, y;
-	
+
 	// afisarea punctelor propriu-zise
 	glColor3f(1, 0.1, 0.1); // rosu
 	glBegin(GL_LINE_STRIP);
 	for (t = -pi + ratia; t < pi; t += ratia) {
 		x = 2 * (a* cos(t) + b)*cos(t);
 		y = 2 * (a* cos(t) + b)*sin(t);
-		glVertex2f(x, y);
+		glVertex2f(x - 0.1, y);
 	}
 	glEnd();
 
@@ -158,21 +157,30 @@ void Display4() {
 void Display5() {
 	double a = 0.2;
 	double pi = 4 * atan(1.0);
-	double ratia = 0.05;
+	double ratia = 0.007;
 	double t;
 	double x, y;
-	
+
 	// afisarea punctelor propriu-zise 
 	glColor3f(1, 0.1, 0.1); // rosu
 	glBegin(GL_LINE_STRIP);
-	for (t = -pi/2 + ratia; t < pi/2&&fabs(t)!=pi/6; t += ratia) {
-		x = a / (4*cos(t)*cos(t)-3);
+	for (t = -pi / 2; t <  - pi / 6; t += ratia) {
+		x = a / (4 * cos(t)*cos(t) - 3);
 		y = (a *tan(t)) / (4 * cos(t)*cos(t) - 3);
 		glVertex2f(x, y);
 	}
 	glEnd();
-
-
+	glBegin(GL_TRIANGLES);
+	for (t = -pi / 6; t > -pi / 2; t -= ratia) {
+		if (t < -pi / 6 && (t > -pi/4.5 || t < -pi/2.5) )
+		{
+			x = a / (4 * cos(t)*cos(t) - 3);
+			y = (a *tan(t)) / (4 * cos(t)*cos(t) - 3);
+			glVertex2f(x, y);
+			glVertex2f(-1, 1);
+		}
+	}
+	glEnd();
 }
 
 
@@ -187,7 +195,7 @@ void Display6() {
 	// afisarea punctelor propriu-zise 
 	glColor3f(1, 0.1, 0.1); // rosu
 	glBegin(GL_LINE_STRIP);
-	for (t = -3*pi + ratia; t < 3*pi; t += ratia) {
+	for (t = -3 * pi + ratia; t < 3 * pi; t += ratia) {
 		x = a * t - b * sin(t);
 		y = a - b * cos(t);
 		glVertex2f(x, y);
@@ -251,19 +259,19 @@ void Display9() {
 	// afisarea punctelor propriu-zise 
 	glColor3f(1, 0.1, 0.1); // rosu
 	glBegin(GL_LINE_STRIP);
-	for (t = -pi/4+ratia; t < pi/4; t += ratia) {
+	for (t = -pi / 4 + ratia; t < pi / 4; t += ratia) {
 		r = a * sqrt(2 * cos(2 * t));
 		x = r * cos(t);
-		y =  r * sin(t);
+		y = r * sin(t);
 		glVertex2f(x, y);
 	}
 	glEnd();
-	
+
 	glBegin(GL_LINE_STRIP);
 	for (t = -pi / 4 + ratia; t < pi / 4; t += ratia) {
-		r =  - a * sqrt(2 * cos(2 * t));
-		x =  r * cos(t);
-		y =  r * sin(t);
+		r = -a * sqrt(2 * cos(2 * t));
+		x = r * cos(t);
+		y = r * sin(t);
 		glVertex2f(x, y);
 	}
 	glEnd();
@@ -276,7 +284,7 @@ void Display0() {
 	double pi = 4 * atan(1.0);
 	double ratia = 0.05;
 	double t;
-	double r ;
+	double r;
 	double x, y;
 
 	// afisarea punctelor propriu-zise
