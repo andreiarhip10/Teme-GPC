@@ -149,6 +149,20 @@ public:
     glEnd();
   }
 
+  void deseneazaPatrat(CPunct p, double lungime)
+  {
+	  double x, y;
+	  p.getxy(x, y);
+	  glColor3f(1.0, 0.1, 0.1);
+	  glBegin(GL_POLYGON);
+		glVertex2d(x, y);
+		glVertex2d(x + lungime, y);
+		glVertex2d(x + lungime, y + lungime);
+		glVertex2d(x, y + lungime);
+	  glEnd();
+
+  }
+
   void print(FILE *fis)
   {
     fprintf(fis, "%+fi %+fj", C2coord::m.x, C2coord::m.y);
@@ -354,6 +368,203 @@ public:
   }
 };
 
+class Imagine1
+{
+	public:
+		void imagine1(double lungime, int nivel, CPunct &p, CVector &v, int d)
+		{
+			CPunct punct;
+			double lungime_nivel_superior;
+			if (nivel == 0)
+			{
+				double x, y;
+				p.getxy(x, y);
+
+				CPunct centru(x + lungime, y - lungime);
+				//v.rotatie(90 * d);
+				v.deseneaza(centru, lungime);
+
+				punct = v.getDest(centru, lungime);
+				v.rotatie(-90 * d);
+				v.deseneaza(punct, lungime);
+
+				punct = v.getDest(punct, lungime);
+				v.rotatie(-90 * d);
+				v.deseneaza(punct, lungime);
+
+				punct = v.getDest(punct, lungime);
+				v.rotatie(-90 * d);
+				v.deseneaza(punct, lungime);
+
+				punct = v.getDest(punct, lungime);
+				v.rotatie(-90 * d);
+
+			}
+			else
+			{
+				double x, y;
+				p.getxy(x, y);
+				lungime_nivel_superior = lungime / 3;
+
+				CPunct sus(x + lungime, y + 2 * lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, sus, v, 1);
+
+				CPunct dr_sus(x + 2 * lungime, y + 2 * lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, dr_sus, v, 1);
+
+				CPunct dr(x + 2 * lungime, y - lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, dr, v, 1);
+
+				CPunct dr_jos(x + 2 * lungime, y - lungime - lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, dr_jos, v, 1);
+
+				CPunct jos(x + lungime, y - lungime - lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, jos, v, 1);
+
+				CPunct st_jos(x, y - lungime - lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, st_jos, v, 1);
+
+				CPunct st(x, y - lungime + 2 * lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, st, v, 1);
+
+				CPunct st_sus(x, y + 2 * lungime_nivel_superior);
+				imagine1(lungime_nivel_superior, nivel - 1, st_sus, v, 1);
+
+				imagine1(lungime, nivel - 1, p, v, 1);
+
+			
+			}
+		}
+
+		void afisare(double lungime, int nivel)
+		{
+			CVector v(0.0, 0.1);
+			CPunct p(-0.75, 0.25);
+
+			imagine1(lungime, nivel, p, v, 1);
+		}
+};
+
+class Imagine2
+{
+public:
+	void imagine2(double lungime,
+		int nivel,
+		double factordiviziune,
+		CPunct p,
+		CVector v)
+	{
+		assert(factordiviziune != 0);
+		CPunct p1, p2;
+		if (nivel == 0)
+		{
+		}
+		else
+		{
+			v.deseneaza(p, 0.3 * lungime);
+			p = v.getDest(p, 0.3 * lungime);
+
+			v.rotatie(45);
+			v.deseneaza(p, lungime);
+			p1 = v.getDest(p, lungime);
+
+			v.rotatie(-90);
+			v.deseneaza(p, lungime * 0.8);
+			p1 = v.getDest(p, lungime * 0.8);
+			imagine2(lungime * factordiviziune, nivel - 1, factordiviziune, p1, v);
+			p1 = v.getDest(p1, lungime * 0.2);
+
+
+			v.rotatie(135);
+			p1 = v.getDest(p1, lungime * 1.4);
+			v.rotatie(-90);
+			v.deseneaza(p1, lungime);
+			p2 = v.getDest(p1, lungime);
+
+			v.rotatie(-90);
+			v.deseneaza(p2, 0.4 * lungime);
+			p2 = v.getDest(p2, 0.4 * lungime);
+			imagine2(lungime * factordiviziune, nivel - 1, factordiviziune, p2, v);
+
+			v.rotatie(180);
+			p2 = v.getDest(p2, 0.4 * lungime);
+			v.rotatie(-60);
+			v.deseneaza(p2, 0.4 * lungime);
+			p2 = v.getDest(p2, 0.4 * lungime);
+			imagine2(lungime * factordiviziune, nivel - 1, factordiviziune, p2, v);
+			v.rotatie(-30);
+
+
+			v.rotatie(60);
+			v.deseneaza(p1, lungime);
+			p1 = v.getDest(p1, lungime);
+			imagine2(lungime * factordiviziune, nivel - 1, factordiviziune, p1, v);
+		}
+	}
+
+	void afisare(double lungime, int nivel)
+	{
+		CVector v(0.0, 1.0);
+		CPunct p(-0.25, 1.0);
+
+		v.rotatie(180);
+		imagine2(lungime, nivel, 0.35, p, v);
+	}
+};
+
+class Imagine3
+{
+public:
+	void imagine3(double lungime, int nivel, double factordiviziune, CPunct &p, CVector &v, int d, int directie, double orientare)
+	{
+		if (nivel == 0)
+		{
+			v.deseneaza(p, lungime);
+			p = v.getDest(p, lungime);
+		}
+		else
+		{
+			if (directie == 0)
+			{
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, (directie + 1) % 2, orientare);
+				v.rotatie(60 * d * orientare);
+
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, directie, orientare);
+				v.rotatie(60 * d * orientare);
+
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, (directie + 1) % 2, orientare);
+			}
+			else
+			{
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, (directie + 1) % 2, orientare);
+				v.rotatie(-60 * d * orientare);
+
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, directie, orientare);
+				v.rotatie(-60 * d * orientare);
+
+				imagine3(lungime*factordiviziune, nivel - 1, factordiviziune, p, v, d, (directie + 1) % 2, orientare);
+			}
+
+		}
+	}
+
+	void afisare(double lungime, int nivel)
+	{
+		CVector v(1.0, 0.0);
+		CPunct p(-0.98, 0.6);
+		v.rotatie(-90);
+
+		if (nivel % 2 == 0)
+		{
+			imagine3(lungime, nivel, 0.53, p, v, 1, 0, -1);
+		}
+		else
+		{
+			imagine3(lungime, nivel, 0.53, p, v, 1, 0, 1);
+		}
+	}
+};
+
 
 
 // afisare curba lui Koch "fulg de zapada"
@@ -501,6 +712,27 @@ void Display4() {
   nivel++;
 }
 
+void Display5() {
+	Imagine1 img1;
+	img1.afisare(0.5, nivel);
+
+	nivel++;
+}
+
+void Display6() {
+	Imagine2 img2;
+	img2.afisare(0.45, nivel);
+
+	nivel++;
+}
+
+void Display7() {
+	Imagine3 img3;
+	img3.afisare(0.8, nivel);
+
+	nivel++;
+}
+
 void Init(void) {
 
    glClearColor(1.0,1.0,1.0,1.0);
@@ -537,6 +769,18 @@ void Display(void)
       glClear(GL_COLOR_BUFFER_BIT);
       Display4();
       break;
+	case '5':
+		glClear(GL_COLOR_BUFFER_BIT);
+		Display5();
+		break;
+	case '6':
+		glClear(GL_COLOR_BUFFER_BIT);
+		Display6();
+		break;
+	case '7':
+		glClear(GL_COLOR_BUFFER_BIT);
+		Display7();
+		break;
     default:
       break;
   }
@@ -587,5 +831,4 @@ int main(int argc, char** argv)
 
   return 0;
 }
-
 

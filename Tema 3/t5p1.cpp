@@ -179,6 +179,112 @@ private:
   } m;
 };
 
+class Mandelbrot {
+public:
+	Mandelbrot()
+	{
+		// m.c se initializeaza implicit cu 0+0i
+
+		m.nriter = NRITER_JF;
+		m.modmax = MODMAX_JF;
+	}
+
+	Mandelbrot(CComplex &c)
+	{
+		m.c = c;
+		m.nriter = NRITER_JF;
+		m.modmax = MODMAX_JF;
+	}
+
+	~Mandelbrot() {}
+
+	void setmodmax(double v) { assert(v <= MODMAX_JF); m.modmax = v; }
+	double getmodmax() { return m.modmax; }
+
+	void setnriter(int v) { assert(v <= NRITER_JF); m.nriter = v; }
+	int getnriter() { return m.nriter; }
+
+	// testeaza daca x apartine multimii Julia-Fatou Jc
+	// returneaza 0 daca apartine, -1 daca converge finit, +1 daca converge infinit
+	int isIn(CComplex &x)
+	{
+		int rez = 0;
+		// tablou in care vor fi memorate valorile procesului iterativ z_n+1 = z_n * z_n + c
+		CComplex z0, z1;
+
+		z0 = x;
+		for (int i = 1; i < m.nriter; i++)
+		{
+			z1 = z0 * z0 + x;
+			if (z1 == z0)
+			{
+				// x nu apartine m.J-F deoarece procesul iterativ converge finit
+				break;
+			}
+			else if (z1.getModul() > m.modmax)
+			{
+				// x nu apartine m.J-F deoarece procesul iterativ converge la infinit
+				rez = 1;
+				break;
+			}
+			z0 = z1;
+		}
+
+		return rez;
+	}
+
+	// afisarea multimii J-F care intersecteaza multimea argument
+	void display(double xmin, double ymin, double xmax, double ymax)
+	{
+		glPushMatrix();
+		glLoadIdentity();
+
+		//    glTranslated((xmin + xmax) * 1.0 / (xmin - xmax), (ymin + ymax)  * 1.0 / (ymin - ymax), 0);
+		//    glScaled(1.0 / (xmax - xmin), 1.0 / (ymax - ymin), 1);
+		// afisarea propriu-zisa
+		int iteration = 0;
+		glBegin(GL_POINTS);
+		for (double x = xmin; x <= xmax; x += RX_JF)
+			for (double y = ymin; y <= ymax; y += RY_JF)
+			{
+				
+				CComplex z(x, y);
+				int r = isIn(z);
+				//        z.print(stdout);
+				if (r == 0)
+				{
+					//          fprintf(stdout, "   \n");
+					glVertex3d(x/2, y/2, 0);
+				}
+				else if (r == -1)
+				{
+					//          fprintf(stdout, "   converge finit\n");
+
+				}
+				else if (r == 1)
+				{
+					//          fprintf(stdout, "   converge infinit\n");
+					glColor3f(0.1, 1.0, 0.1);
+					glVertex3d(x / 2, y / 2, 0);
+					glColor3f(1.0, 0.1, 0.1);
+				}
+			}
+		fprintf(stdout, "STOP\n");
+		glEnd();
+
+		glPopMatrix();
+	}
+
+private:
+	struct SDate {
+		CComplex c;
+		// nr. de iteratii
+		int nriter;
+		// modulul maxim
+		double modmax;
+	} m;
+};
+
 // multimea Julia-Fatou pentru z0 = 0 si c = -0.12375+0.056805i
 void Display1() {
   CComplex c(-0.12375, 0.056805);
@@ -197,6 +303,15 @@ void Display2() {
   glColor3f(1.0, 0.1, 0.1);
   cjf.setnriter(30);
   cjf.display(-1, -1, 1, 1);
+}
+
+void Display3() {
+	CComplex c(-0.012, 0.74);
+	Mandelbrot m(c);
+
+	glColor3f(1.0, 0.1, 0.1);
+	m.setnriter(100);
+	m.display(-2, -2, 2, 2);
 }
 
 void Init(void) {
@@ -220,6 +335,10 @@ void Display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     Display2();
     break;
+  case '3':
+	  glClear(GL_COLOR_BUFFER_BIT);
+	  Display3();
+	  break;
   default:
     break;
   }
