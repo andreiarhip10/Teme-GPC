@@ -3,12 +3,17 @@
 #include <math.h>
 #include <assert.h>
 #include <float.h>
+#include <iostream>
 
 #include "glut.h"
+
+using namespace std;
 
 // dimensiunea ferestrei in pixeli
 #define dim 300
 unsigned char prevKey;
+
+double PI = 4 * atan(1.0);
 
 class GrilaCarteziana {
 
@@ -23,7 +28,7 @@ public:
 	double getCol() { return col; }
 	void setCol(float col1) { col = col1; }
 
-	void deseneazaGrila(float lin,float col) {
+	void deseneazaGrila() {
 		
 		//pt scalare
 		glMatrixMode(GL_PROJECTION);
@@ -62,6 +67,38 @@ public:
 
 	}
 
+	void writePixel(int line, int column) {
+		glColor3f(0.5, 0.5, 0.5);
+		float x = -0.8 + column * (1.6/col);
+		float y = 0.8 - line * (1.6/lin);
+		float radius = 0.03;
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(x, y);
+		for (int i = 0; i <= 100; i++)
+		{
+			glVertex2f((x + (radius * cos(i * 2 * PI / 100))), (y + (radius * sin(i * 2 * PI / 100))));
+		}
+		glEnd();
+	}
+
+	void drawSegment(int begin_line, int begin_column, int end_line, int end_column) {
+		float beginx = -0.8 + begin_column * (1.6 / col);
+		float beginy = 0.8 - begin_line * (1.6 / lin);
+		float endx = -0.8 + end_column * (1.6 / col);
+		float endy = 0.8 - end_line * (1.6 / lin);
+		glColor3f(1.0, 0.1, 0.1);
+		glBegin(GL_LINE_STRIP);
+			glVertex2f(beginx, beginy);
+			glVertex2f(endx, endy);
+		glEnd();
+		writePixel(begin_line, begin_column);
+		writePixel(end_line, end_column);
+		float cosine = (endx - beginx) / (sqrt(pow(endx - beginx, 2) + pow(endy - beginy, 2)));
+		cout << cosine;
+		// if 0.707 - 45 degrees angle, if > - iterate through columns, if < - iterate through lines
+
+	}
+
 private:
 	float lin,col;
 };
@@ -69,8 +106,10 @@ private:
 
 
 void Display1(){
-	GrilaCarteziana grila;
-	grila.deseneazaGrila(20,20);
+	GrilaCarteziana grila =	GrilaCarteziana(15, 15);
+	grila.deseneazaGrila();
+	//grila.writePixel(4, 14);
+	grila.drawSegment(15, 0, 0, 10);
 };
 
 void Init(void) {
