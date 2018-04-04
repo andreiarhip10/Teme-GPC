@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -82,10 +84,31 @@ public:
 	}
 
 	void drawSegment(int begin_line, int begin_column, int end_line, int end_column) {
-		float beginx = -0.8 + begin_column * (1.6 / col);
-		float beginy = 0.8 - begin_line * (1.6 / lin);
-		float endx = -0.8 + end_column * (1.6 / col);
-		float endy = 0.8 - end_line * (1.6 / lin);
+		double beginx = -0.8 + begin_column * (1.6 / col);
+		double beginy = 0.8 - begin_line * (1.6 / lin);
+		double endx = -0.8 + end_column * (1.6 / col);
+		double endy = 0.8 - end_line * (1.6 / lin);
+		char sensx[10], sensy[10];
+		if (begin_column < end_column)
+		{
+			strcpy(sensx, "dreapta");
+		}
+		else
+		{
+			strcpy(sensx, "stanga");
+		}
+		if (begin_line < end_line)
+		{
+			strcpy(sensy, "jos");
+		}
+		else
+		{
+			strcpy(sensy, "sus");
+		}
+		// panta: m
+		double slope = (endy - beginy) / (endx - beginx);
+		// ecuatia dreptei: y - beginy = m (x - beginx) ( x va fi incrementat la fiecare coloana strabatuta , in cazul in care unghiul < 45d)
+
 		glColor3f(1.0, 0.1, 0.1);
 		glBegin(GL_LINE_STRIP);
 			glVertex2f(beginx, beginy);
@@ -93,14 +116,274 @@ public:
 		glEnd();
 		writePixel(begin_line, begin_column);
 		writePixel(end_line, end_column);
-		float cosine = (endx - beginx) / (sqrt(pow(endx - beginx, 2) + pow(endy - beginy, 2)));
-		cout << cosine;
+		double cosine = (abs(endx - beginx)) / (sqrt(pow(endx - beginx, 2) + pow(endy - beginy, 2)));
+		//double verifCosine = cos(PI/4);
 		// if 0.707 - 45 degrees angle, if > - iterate through columns, if < - iterate through lines
-
+		//cout << verifCosine - cosine;
+		if (cosine >= 0.707106 && cosine <= 0.707107)
+		{
+			cout << "45 degrees angle" << endl;
+			//cout << sensx << " " << sensy;
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "sus"))
+			{
+				int line = begin_line - 1;
+				for (int column = begin_column + 1; column < end_column; column++)
+				{
+					cout << "column: " << column << " line: " << line << endl;
+					//cout << passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "dreapta sus") << endl;
+					writePixel(line, column);
+					line--;
+				}
+			}
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "jos"))
+			{
+				int line = begin_line + 1;
+				for (int column = begin_column + 1; column < end_column; column++)
+				{
+					cout << "column: " << column << " line: " << line << endl;
+					//cout << passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "dreapta sus") << endl;
+					writePixel(line, column);
+					line++;
+				}
+			}
+			if (!strcmp(sensx, "stanga") && !strcmp(sensy, "jos"))
+			{
+				int line = begin_line + 1;
+				for (int column = begin_column - 1; column > end_column; column--)
+				{
+					cout << "column: " << column << " line: " << line << endl;
+					//cout << passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "dreapta sus") << endl;
+					writePixel(line, column);
+					line++;
+				}
+			}
+			if (!strcmp(sensx, "stanga") && !strcmp(sensy, "sus"))
+			{
+				int line = begin_line - 1;
+				for (int column = begin_column - 1; column > end_column; column--)
+				{
+					cout << "column: " << column << " line: " << line << endl;
+					//cout << passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "dreapta sus") << endl;
+					writePixel(line, column);
+					line--;
+				}
+			}
+		}
+		else if (cosine > 0.707107)
+		{
+			cout << "angle lower than 45 degrees - segment intersects columns" << endl;
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "sus"))
+			{
+				// drawing intersecting points
+				for (int column = begin_column + 1; column < end_column; column++)
+				{
+					double passing_point = passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "< 45");
+					cout << "column: " << column << " intersected in point: " << passing_point << endl;
+					findClosestPixel(passing_point, column, "dreapta sus", "< 45");
+				}
+			}
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "jos"))
+			{
+				for (int column = begin_column + 1; column < end_column; column++)
+				{
+					double passing_point = passingPoint(slope, beginx, beginy, (-0.8 + column * (1.6 / col)), "< 45");
+					//cout << "column: " << column << " intersected in point: " << passing_point << endl;
+					findClosestPixel(passing_point, column, "dreapta jos", "< 45");
+				}
+			}
+		}
+		else if (cosine < 0.707106)
+		{
+			cout << "angle higher than 45 degrees - segment intersects lines" << endl;
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "sus"))
+			{
+				for (int line = begin_line - 1; line > end_line; line--)
+				{
+					double passing_point = passingPoint(slope, beginx, beginy, (0.8 - line * (1.6 / lin)), "> 45");
+					cout << "line: " << line << " intersected in point: " << passing_point << endl;
+					findClosestPixel(passing_point, line, "dreapta sus", "> 45");
+				}
+			}
+			if (!strcmp(sensx, "dreapta") && !strcmp(sensy, "jos"))
+			{
+				for (int line = begin_line + 1; line < end_line; line++)
+				{
+					double passing_point = passingPoint(slope, beginx, beginy, (0.8 - line * (1.6 / lin)), "> 45");
+					cout << "line: " << line << " intersected in point: " << passing_point << endl;
+					/*glColor3f(0.1, 0.5, 1.0);
+					glBegin(GL_POINTS);
+					glVertex2f(passing_point, (0.8 - line * (1.6 / lin)));
+					glEnd();*/
+					findClosestPixel(passing_point, line, "dreapta jos", "> 45");
+				}
+			}
+		}
 	}
 
 private:
 	float lin,col;
+
+	double passingPoint(double m, double x1, double y1, double known_point, char angle[10])
+	{
+		if (!strcmp(angle, "> 45"))
+		{
+			return (known_point - y1) / m + x1;
+		}
+		else if (!strcmp(angle, "< 45"))
+		{
+			return m * (known_point - x1) + y1;
+		}
+	}
+
+	void findClosestPixel(double passing_point, int decision_line, char directie[20], char unghi[10])
+	{
+		if (!strcmp(directie, "dreapta sus"))
+		{
+			if (!strcmp(unghi, "< 45"))
+			{
+				for (double y = 0.8; y > -0.8; y -= 1.6 / lin)
+				{
+					// we have reached the intersection point
+					if (passing_point < y && passing_point > y - 1.6 / lin)
+					{
+						int chosen_line = 0;
+						double pointy = y;
+						if (y - passing_point < passing_point - (y - 1.6 / lin))
+						{
+							// double beginx = -0.8 + begin_column * (1.6 / col);
+							while (pointy < 0.8)
+							{
+								chosen_line++;
+								pointy += 1.6 / lin;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						else
+						{
+							while (pointy - 1.6 / lin < 0.8)
+							{
+								chosen_line++;
+								pointy += 1.6 / lin;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						if (y - passing_point == passing_point - (y - 1.6 / lin))
+						{
+							while (pointy - 1.6 / lin < 0.8)
+							{
+								chosen_line++;
+								pointy += 1.6 / lin;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						writePixel(chosen_line, decision_line);
+					}
+				}
+			}
+			else if (!strcmp(unghi, "> 45"))
+			{
+				for (double x = -0.8; x < 0.8; x += 1.6 / col)	//	for angles > 45
+				{
+					// we have reached the intersection point
+					if (passing_point > x && passing_point < x + 1.6 / col)
+					{
+						int chosen_line = 0;
+						double pointx = x;
+						if (passing_point - x < (x + 1.6 / col) - passing_point)
+						{
+							// double beginx = -0.8 + begin_column * (1.6 / col);
+							while (pointx > -0.8)
+							{
+								chosen_line++;
+								pointx -= 1.6 / col;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						else
+						{
+							while (pointx + 1.6 / col > -0.8)
+							{
+								chosen_line++;
+								pointx -= 1.6 / col;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						writePixel(decision_line, chosen_line);
+					}
+				}
+			}
+		}
+
+		if (!strcmp(directie, "dreapta jos"))
+		{
+			if (!strcmp(unghi, "< 45"))
+			{
+				for (double y = 0.8; y > -0.8; y -= 1.6 / lin)
+				{
+					// we have reached the intersection point
+					if (passing_point < y && passing_point > y - 1.6 / lin)
+					{
+						int chosen_line = 0;
+						double pointy = y;
+						if (y - passing_point < passing_point - (y - 1.6 / lin))
+						{
+							// double beginx = -0.8 + begin_column * (1.6 / col);
+							while (pointy < 0.8)
+							{
+								chosen_line++;
+								pointy += 1.6 / lin;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						else
+						{
+							while (pointy - 1.6 / lin < 0.8)
+							{
+								chosen_line++;
+								pointy += 1.6 / lin;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						writePixel(chosen_line, decision_line);
+					}
+				}
+			}
+			if (!strcmp(unghi, "> 45"))
+			{
+				for (double x = -0.8; x < 0.8; x += 1.6 / col)	//	for angles > 45
+				{
+					// we have reached the intersection point
+					if (passing_point > x && passing_point < x + 1.6 / col)
+					{
+						int chosen_line = 0;
+						double pointx = x;
+						if (passing_point - x < (x + 1.6 / col) - passing_point)
+						{
+							// double beginx = -0.8 + begin_column * (1.6 / col);
+							while (pointx > -0.8)
+							{
+								chosen_line++;
+								pointx -= 1.6 / col;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						else
+						{
+							while (pointx + 1.6 / col > -0.8)
+							{
+								chosen_line++;
+								pointx -= 1.6 / col;
+							}
+							cout << "chosen line: " << chosen_line << endl;
+						}
+						writePixel(decision_line, chosen_line);
+					}
+				}
+			}
+
+		}
+
+	}
 };
 
 
@@ -109,7 +392,7 @@ void Display1(){
 	GrilaCarteziana grila =	GrilaCarteziana(15, 15);
 	grila.deseneazaGrila();
 	//grila.writePixel(4, 14);
-	grila.drawSegment(15, 0, 0, 10);
+	grila.drawSegment(3, 3, 15, 13);
 };
 
 void Init(void) {
